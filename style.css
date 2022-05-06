@@ -1,0 +1,18 @@
+html , body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: black;
+}
+
+#gameCanvasContainer{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+#output {
+    font-family: Arial, Helvetica, sans-serif;
+    border: 1px solid black;
+}  
