@@ -4,6 +4,7 @@ let count_star = 0;
 let pause = false;
 let gameOver = false;
 let start = true
+let settings = false
 
 let sprPlayer;
 let freeze;
@@ -13,9 +14,9 @@ let enemiesGrp;
 let heartGrp;
 let backgroundGrp;
 let bulletGrp;
+let powerupGrp;
 
 let score = 0;
-let level = 1;
 
 let debug = false;
 
@@ -159,13 +160,13 @@ function createEnemy(x, y, w = 64, h = 64, hp = 100, id = 1) {
                 enemy_death.play()
                 this.remove();
                 score += 1000;
-            } else if (this.hp <= 1000 && this.phase < 4) {
+            } else if (this.hp <= 500 && this.phase < 4) {
                 this.changeImage("4"); //phase 4
                 this.phase++;
-            } else if (this.hp <= 2000 && this.phase < 3) {
+            } else if (this.hp <= 1000 && this.phase < 3) {
                 this.changeImage("3"); //phase 3
                 this.phase++;
-            } else if (this.hp <= 3000 && this.phase < 2) {
+            } else if (this.hp <= 1500 && this.phase < 2) {
                 this.changeImage("2"); //phase 2
                 this.phase++;
             }
@@ -177,6 +178,7 @@ function createEnemy(x, y, w = 64, h = 64, hp = 100, id = 1) {
                 enemy_death.play()
                 this.remove();
                 score += 10 * id;
+                createpowerup(this.position.x,this.position.y, 32, 32, 0.5, function(){coeur()}, 90, loadImage("img/Coeur1.png"))
             }
         }
     }
@@ -216,10 +218,12 @@ function updateEnemy() {
             }
         } else if (i.id === 4) {
             if (i.status) {
+                let direction = 90;
                 i.rotation = degrees(Math.atan2(sprPlayer.position.y - i.position.y, sprPlayer.position.x - i.position.x)) - 90
-                i.setSpeed(Math.floor((Math.random() * 3)), i.rotation + 90);
-                if (count % 60 === 0) {
+                i.setSpeed(Math.floor((Math.random() * 5)), i.rotation + 90 + direction);
+                if (count % 120 === 0) {
                     i.shoot();
+                    direction += 1;
                 }
             } else {
                 i.setSpeed(1, 90);
@@ -233,24 +237,23 @@ function updateEnemy() {
     };
     //New Wave
     if (enemiesGrp.length === 0) {
-        if (wave >= 0) { //wave % 20 === 0 && wave != 0
-            createAllEnemy(1, 4); //Boss
+        wave++;
+        if (wave % 20 === 0) { //Boss
+            createAllEnemy(1, 4);
         } else if (wave % 20 === 10) { //Poulpe
-            let spawn = Math.floor(Math.random() * 6) + 5;
+            let spawn = Math.floor(Math.random() * 5) + 4;
             createAllEnemy(spawn, 3);
-        } else if (wave % 20 === 5 || wave % 20 === 15) { //Dragon
-            let spawn = Math.floor(Math.random() * 7) + 6;
+        } else if (wave % 20 === 5 || wave % 20 - 1 === 15) { //Dragon
+            let spawn = Math.floor(Math.random() * 5) + 4;
             createAllEnemy(spawn, 2);
         } else { //Classique
-            let spawn = Math.floor(Math.random() * 4) + 3;
+            let spawn = Math.floor(Math.random() * 4) + 2;
             createAllEnemy(spawn, 1);
-            spawn = Math.floor(Math.random() * 2) + 2;
+            spawn = Math.floor(Math.random() * 2) + 1;
             createAllEnemy(spawn, 2);
             spawn = Math.floor(Math.random() * 2);
             createAllEnemy(spawn, 3);
         };
-        level++;
-        wave++;
     }
 }
 
@@ -262,7 +265,7 @@ function createAllEnemy(num, id) {
             x = Math.floor(Math.random() * 1236);
         }
         if (id === 4) {
-            createEnemy(x, Math.floor(Math.random() * -1000), 45, 61, 5000, id);
+            createEnemy(x, Math.floor(Math.random() * -1000), 45, 61, 2000, id);
         } else {
             createEnemy(x, Math.floor(Math.random() * -1000), 64, 64, 100, id);
         };
@@ -315,6 +318,7 @@ function createPlayer(x, y, h, w) {
     }
     playerGrp = Group();
     sprPlayer.addToGroup(playerGrp);
+    // createpowerup(320, 200, 64, 64, 0.5, function(){Shower()}, +90, loadImage("img/Douche.png"))
 }
 
 
@@ -412,16 +416,64 @@ function createBullet(x, y, image, rm, target = true, speed = 10, rot = sprPlaye
 
 //#endregion
 
+
+
+//#region powerup
+
+
 function Shower() {
-    if (count >= 600) {
-        // createSprite(x, y)
-        // loadImage("./img/Icone.png")
-        textSize(10);
-        textAlign(CENTER, CENTER)
-        fill(255, 204, 0)
-        text("Il est temps d'aller prendre une douche", 640, 400)
+    textSize(50);
+    textAlign(CENTER, CENTER)
+    fill(255, 204, 0)
+    text("Il est temps d'aller prendre une douche", 640, 400)
+}
+
+function coeur() {
+    if (sprPlayer.lifes === 3 ){
+        if (sprPlayer.hp === 100){
+            score += 100;
+        }else{
+            sprPlayer.hp = 100;
+        }
+    }else{
+        sprPlayer.lifes += 1;
     }
 }
+
+function createpowerup(x, y, h, w, speed, activation, direction, image) {
+    let sprpowerup = createSprite(x,y)
+    sprpowerup.setSpeed(speed,direction)
+    sprpowerup.addImage(image)
+    sprpowerup.oncollide = activation
+    sprpowerup.rm = function(){
+        this.oncollide()
+        this.remove()
+    }
+    sprpowerup.addToGroup(powerupGrp)
+}
+
+function updatePowerup() {
+    powerupGrp.forEach(element => {
+        if (element.target) {
+            outOfScreen(element);
+                element.collide(playerGrp, function() {
+                    element.rm();
+                });
+        } else {
+            element.collide(playerGrp, function() {
+                element.rm();
+            });
+            if (element.time + element.timelife <= count) {
+                element.rm();
+            }
+        }
+    });
+}
+
+
+
+
+//#endregion
 
 //#region gui
 
@@ -491,12 +543,10 @@ function gameUpdate() {
     count++;
     cheatCode();
     playerUpdate();
-    update_star();
+    start_back();
     updateEnemy();
     bulletUpdate();
-    if (count % 4 === 0) {
-        draw_star()
-    }
+    updatePowerup();   
 }
 
 //#region cheatCode
@@ -528,6 +578,9 @@ var bounce_sound;
 var game_music;
 var restartBtn;
 var startBtn;
+var settingsBtn;
+var goBack;
+var gui;
 
 
 var hearts = [];
@@ -543,13 +596,13 @@ function preload() {
     bullet_explosion = loadSound("./sounds/bullet_explosion.wav")
     bounce_sound = loadSound("./sounds/bounce.wav")
     game_music = loadSound("./sounds/game_music_space.mp3")
-    game_music.setVolume(0.2)
+    game_music.setVolume(0.5)
     bounce_sound.setVolume(0.1)
     enemy_death.setVolume(0.1)
     hit_damage.setVolume(0.2)
     player_death.setVolume(0.6)
     bullet_explosion.setVolume(0.04)
-    player_shoot.setVolume(0.1)
+    player_shoot.setVolume(0.05)
     tiny_ship_img = loadImage("./img/tiny-ship.png")
     tiny_ship = loadSpriteSheet("./img/tiny-ship.png", 64, 64, 9);
     phase1 = loadImage("./img/phase1.png");
@@ -562,9 +615,10 @@ function preload() {
 
 function setup() {
     window.onclose = game_music.stop()
-    enemiesGrp = Group();
-    backgroundGrp = Group();
-        // createAllEnemy(1000);
+    enemiesGrp = Group()
+    backgroundGrp = Group()
+    powerupGrp = Group()
+        // createAllEnemy(1000)
     frameRate(60);
     // noCursor();
     let gameCanvas = createCanvas(1280, 600);
@@ -577,6 +631,8 @@ function setup() {
     sprPlayer.addAnimation("piou", phase1, phase2, phase3, phase4, phase5, phase6, phase6, phase5, phase4, phase3, phase2, phase1)
     sprPlayer.changeAnimation("piou")
     buttonSetup()
+    slider = createSlider(0, 255, 100);
+    slider.hide()
 }
 
 function buttonSetup(){
@@ -600,6 +656,31 @@ function buttonSetup(){
     startBtn.color = "#FFFFFF";
     startBtn.onPress = function() {
         start = false
+        settings = false
+    }
+    settingsBtn = new Clickable();
+    settingsBtn.cornerRadius = 0;
+    settingsBtn.locate(520, 340);
+    settingsBtn.textScaled = true;
+    settingsBtn.text = "SETTINGS";
+    settingsBtn.resize(250, 100);
+    settingsBtn.color = "#FFFFFF";
+    settingsBtn.onPress = function() {
+        slider.show()
+        start = false
+        settings = true
+    }
+    goBack = new Clickable();
+    goBack.cornerRadius = 0;
+    goBack.locate(520, 460);
+    goBack.textScaled = true;
+    goBack.text = "MAIN MENU";
+    goBack.resize(250, 100);
+    goBack.color = "#FFFFFF";
+    goBack.onPress = function() {
+        slider.hide()
+        start = true
+        settings = false
     }
 }
 
@@ -609,6 +690,7 @@ function startMenuDraw(){
     fill(255, 204, 0);
     text("MECHANT TOTOP", 640, 160);
     startBtn.draw()
+    settingsBtn.draw()
 }
 
 
@@ -625,25 +707,27 @@ function debug_up() {
         fill(255, 204, 0);
         text("fps : " + Math.floor(framert).toString(), 50, 10)
     }
-
 }
+let slider
 
 function draw() {
     background(0);
     if (start){
-        if (count % 4 === 0) {
-            draw_star()
-        }
+        count++;
+        start_back();
+        startMenuDraw();
         drawSprites(backgroundGrp);
-        startMenuDraw()
-    }
-    else{
+    }else if(settings){
+        slider.position(10, 10);
+        slider.style('width', '80px');
+        goBack.draw()
+    } else{
         if (!pause) {
             if (!game_music.isPlaying()) {
                 game_music.play();
             }
         } else {
-            game_music.pause()
+            game_music.pause();
         }
         if (!pause) {
             if (timesec == 60) {
@@ -672,7 +756,6 @@ function draw() {
                 bulletGrp.toArray().forEach(i => {
                     i.setSpeed(i.currentSpeed, i.rot)
                 })
-
             }
         }
         if (gameOver) {
@@ -684,14 +767,10 @@ function draw() {
             }
             count++
             game_over()
-            update_star()
-            if (count % 4 === 0) {
-                draw_star()
-            }
+            start_back()
             drawSprites(backgroundGrp);
             restartBtn.draw();
         }
-
         if (pause) {
             drawSprites();
             drawSprites(bulletGrp);
@@ -705,14 +784,17 @@ function draw() {
             drawSprites(playerGrp);
             draw_gui();
         }
-        debug_up();
     }
+    debug_up();
 }
 
 
 function mousePressed() {
-    let fs = fullscreen();
-    fullscreen(!fs);
+    if (!start && !settings){
+        let fs = fullscreen();
+        fullscreen(!fs);        
+    }
+
 }
 
 
@@ -754,8 +836,14 @@ function update_star() {
         i.rm()
     }
 }
-//#endregion
 
+function start_back(){
+    update_star()
+    if (count % 4 === 0) {
+        draw_star()
+    }
+}
+//#endregion
 
 //#region Bonus
 
