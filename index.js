@@ -3,6 +3,7 @@ let count_star = 0;
 
 let pause = false;
 let gameOver = false;
+let start = true
 
 let sprPlayer;
 let freeze;
@@ -10,8 +11,8 @@ let freeze;
 let playerGrp;
 let enemiesGrp;
 let heartGrp;
-let bulletGrp;
 let backgroundGrp;
+let bulletGrp;
 
 let score = 0;
 let level = 1;
@@ -22,6 +23,8 @@ let time = 0;
 let timesec = 0;
 
 let wave = 0;
+
+let etoileIMG ;
 
 
 //#region Tools
@@ -53,8 +56,8 @@ function enemyOutOfScreen(body) {
 
 //#region Enemy
 
-function createEnemy(x, y, h = 64, w = 64, hp = 100, id = 1) {
-    let sprEnemy = createSprite(x, y, h, w);
+function createEnemy(x, y, w = 64, h = 64, hp = 100, id = 1) {
+    let sprEnemy = createSprite(x, y, w, h);
     sprEnemy.id = id
     sprEnemy.friction = 0.1;
     sprEnemy.scale = 1.2;
@@ -68,6 +71,9 @@ function createEnemy(x, y, h = 64, w = 64, hp = 100, id = 1) {
         sprEnemy.col = function(target) {
             target.activeControl = 90;
             target.setSpeed(-12);
+            if (!bounce_sound.isPlaying()) {
+                bounce_sound.play()
+            }
         }
         sprEnemy.shoot = function() {
             for (let i = 0; i < 8; i++) {
@@ -119,13 +125,59 @@ function createEnemy(x, y, h = 64, w = 64, hp = 100, id = 1) {
                 window.setTimeout(function() { bullet.timout() }, 50);
             }, false, 3, sprEnemy.rotation + 90, 150, 10);
         }
-    }
-    sprEnemy.rm = function(dg) {
-        this.hp -= dg;
-        console.log(hp)
-        if (this.hp <= 0) {
-            this.remove();
-            score += 10 * id;
+    } else if (id === 4) { //boss
+        sprEnemy.collide(allSprites)
+        sprEnemy.addImage("1", loadImage("./img/boss1.png"));
+        sprEnemy.addImage("2", loadImage("./img/boss2.png"));
+        sprEnemy.addImage("3", loadImage("./img/boss3.png"));
+        sprEnemy.addImage("4", loadImage("./img/boss4.png"));
+        sprEnemy.scale = 2;
+        sprEnemy.col = function(target) {
+            target.activeControl = 90;
+            target.setSpeed(-12);
+            if (!bounce_sound.isPlaying()) {
+                bounce_sound.play()
+            }
+            target.rm(10);
+        }
+        sprEnemy.phase = 1
+        sprEnemy.shoot = function() {
+            createBullet(sprEnemy.position.x, sprEnemy.position.y, loadImage("./img/balleboss.png"), function() {
+                bulletGrp.remove(this);
+                this.addImage(loadImage("./img/explosionbullet.png"));
+                this.setSpeed(0, sprEnemy.rotation - 90);
+                this.scale = 2;
+                let bullet = this;
+                window.setTimeout(function() { bullet.timout() }, 50);
+            }, false, 5, sprEnemy.rotation + 90, 300, 50);
+        }
+    };
+    if (id == 4) {
+        sprEnemy.rm = function(dg) {
+            this.hp -= dg;
+            if (this.hp <= 0) {
+                enemy_death.play()
+                this.remove();
+                score += 1000;
+            } else if (this.hp <= 1000 && this.phase < 4) {
+                this.changeImage("4"); //phase 4
+                this.phase++;
+            } else if (this.hp <= 2000 && this.phase < 3) {
+                this.changeImage("3"); //phase 3
+                this.phase++;
+            } else if (this.hp <= 3000 && this.phase < 2) {
+                this.changeImage("2"); //phase 2
+                this.phase++;
+            }
+        }
+    } else {
+        sprEnemy.rm = function(dg) {
+            this.hp -= dg;
+            if (this.hp <= 0) {
+                enemy_death.play()
+                this.remove();
+                score += 10 * id;
+            }
         }
     }
     sprEnemy.addToGroup(enemiesGrp);
@@ -143,8 +195,7 @@ function updateEnemy() {
             } else {
                 i.addSpeed(0.5, 90);
             }
-        }
-        if (i.id === 2) {
+        } else if (i.id === 2) {
             if (i.status) {
                 i.addSpeed(Math.floor((Math.random() * 3)), Math.floor(Math.random() * 361));
                 if (count % 180 === 0) {
@@ -153,8 +204,7 @@ function updateEnemy() {
             } else {
                 i.addSpeed(0.5, 90);
             }
-        }
-        if (i.id === 1) {
+        } else if (i.id === 1) {
             if (i.status) {
                 i.rotation = degrees(Math.atan2(sprPlayer.position.y - i.position.y, sprPlayer.position.x - i.position.x)) - 90
                 i.setSpeed(Math.floor((Math.random() * 3)), i.rotation + 90);
@@ -162,7 +212,17 @@ function updateEnemy() {
                     i.shoot();
                 }
             } else {
-                i.setSpeed(0.5, 90);
+                i.setSpeed(1, 90);
+            }
+        } else if (i.id === 4) {
+            if (i.status) {
+                i.rotation = degrees(Math.atan2(sprPlayer.position.y - i.position.y, sprPlayer.position.x - i.position.x)) - 90
+                i.setSpeed(Math.floor((Math.random() * 3)), i.rotation + 90);
+                if (count % 60 === 0) {
+                    i.shoot();
+                }
+            } else {
+                i.setSpeed(1, 90);
             }
         }
         if (i.status) {
@@ -173,8 +233,8 @@ function updateEnemy() {
     };
     //New Wave
     if (enemiesGrp.length === 0) {
-        if (wave % 20 === 0 && wave != 0) {
-            //Boss
+        if (wave >= 0) { //wave % 20 === 0 && wave != 0
+            createAllEnemy(1, 4); //Boss
         } else if (wave % 20 === 10) { //Poulpe
             let spawn = Math.floor(Math.random() * 6) + 5;
             createAllEnemy(spawn, 3);
@@ -201,7 +261,11 @@ function createAllEnemy(num, id) {
         while (x in all) {
             x = Math.floor(Math.random() * 1236);
         }
-        createEnemy(x, Math.floor(Math.random() * -1000), 64, 64, 100, id);
+        if (id === 4) {
+            createEnemy(x, Math.floor(Math.random() * -1000), 45, 61, 5000, id);
+        } else {
+            createEnemy(x, Math.floor(Math.random() * -1000), 64, 64, 100, id);
+        };
     }
 }
 
@@ -228,6 +292,7 @@ function createPlayer(x, y, h, w) {
     sprPlayer.activeControl = 0;
     sprPlayer.inv = -70;
     sprPlayer.rm = function(dmg = 0) {
+        hit_damage.play()
         if (this.inv + 30 <= count) {
             if (this.hp > 0) {
                 this.hp -= dmg;
@@ -242,6 +307,7 @@ function createPlayer(x, y, h, w) {
                 playerGrp.removeSprites();
                 enemiesGrp.removeSprites();
                 bulletGrp.removeSprites();
+                player_death.play()
                 gameOver = true;
                 pause = true;
             }
@@ -267,6 +333,12 @@ function playerUpdate() {
     if (keyIsDown(RIGHT_ARROW) == true || keyIsDown(68) == true) {
         sprPlayer.rotation += 6;
     }
+    if (keyIsDown(65) == true && sprPlayer.activeControl == 0) {
+        sprPlayer.addSpeed(0.4, sprPlayer.rotation - 180)
+    }
+    if (keyIsDown(69) == true && sprPlayer.activeControl == 0) {
+        sprPlayer.addSpeed(0.4, sprPlayer.rotation)
+    }
     if ((keyIsDown(UP_ARROW) == true || keyIsDown(90) == true) && sprPlayer.activeControl == 0) {
         sprPlayer.addSpeed(0.4, sprPlayer.rotation - 90);
     }
@@ -282,8 +354,10 @@ function playerUpdate() {
             this.scale = 2;
             this.speed = 1;
             let bullet = this;
+            bullet_explosion.play()
             window.setTimeout(function() { bullet.timout() }, 50);
         });
+        player_shoot.play()
     }
     outOfScreen(sprPlayer);
     // powerup de ouf
@@ -414,16 +488,26 @@ function draw_gui() {
 //#endregion
 
 function gameUpdate() {
-    count++
-    playerUpdate()
-    update_star()
-    updateEnemy()
-    bulletUpdate()
+    count++;
+    cheatCode();
+    playerUpdate();
+    update_star();
+    updateEnemy();
+    bulletUpdate();
     if (count % 4 === 0) {
         draw_star()
     }
 }
 
+//#region cheatCode
+
+function cheatCode(){
+    if (keyWentDown(164)){
+        let code = prompt("Hmmmm ...")
+    }
+}
+
+//#endregion
 
 
 let framert;
@@ -435,6 +519,15 @@ var phase5;
 var phase6;
 var tiny_ship;
 var tiny_ship_img;
+var player_shoot;
+var bullet_explosion;
+var player_death;
+var enemy_death;
+var hit_damage;
+var bounce_sound;
+var game_music;
+var restartBtn;
+var startBtn;
 
 
 var hearts = [];
@@ -443,6 +536,20 @@ function preload() {
     for (let i = 1; i <= 6; i++) {
         hearts.push(loadImage("./img/Coeur" + i.toString() + ".png"));
     }
+    player_death = loadSound("./sounds/player_death.wav")
+    enemy_death = loadSound("./sounds/enemy_death.wav")
+    hit_damage = loadSound("./sounds/hit_damage.wav")
+    player_shoot = loadSound("./sounds/player_shoot.wav")
+    bullet_explosion = loadSound("./sounds/bullet_explosion.wav")
+    bounce_sound = loadSound("./sounds/bounce.wav")
+    game_music = loadSound("./sounds/game_music_space.mp3")
+    game_music.setVolume(0.2)
+    bounce_sound.setVolume(0.1)
+    enemy_death.setVolume(0.1)
+    hit_damage.setVolume(0.2)
+    player_death.setVolume(0.6)
+    bullet_explosion.setVolume(0.04)
+    player_shoot.setVolume(0.1)
     tiny_ship_img = loadImage("./img/tiny-ship.png")
     tiny_ship = loadSpriteSheet("./img/tiny-ship.png", 64, 64, 9);
     phase1 = loadImage("./img/phase1.png");
@@ -454,19 +561,54 @@ function preload() {
 }
 
 function setup() {
-    enemiesGrp = Group()
-    backgroundGrp = Group()
-        // createAllEnemy(1000)
+    window.onclose = game_music.stop()
+    enemiesGrp = Group();
+    backgroundGrp = Group();
+        // createAllEnemy(1000);
     frameRate(60);
-    noCursor();
+    // noCursor();
     let gameCanvas = createCanvas(1280, 600);
     gameCanvas.parent("gameCanvasContainer");
+    etoileIMG =  loadImage("./img/etoiles.png");
     createPlayer(500, 300, 100, 200)
-    framert = frameRate()
-    bulletGrp = Group()
-    createHeart()
+    framert = frameRate();
+    bulletGrp = Group();
+    createHeart();
     sprPlayer.addAnimation("piou", phase1, phase2, phase3, phase4, phase5, phase6, phase6, phase5, phase4, phase3, phase2, phase1)
     sprPlayer.changeAnimation("piou")
+    buttonSetup()
+}
+
+function buttonSetup(){
+    restartBtn = new Clickable();
+    restartBtn.cornerRadius = 0;
+    restartBtn.locate(520, 460);
+    restartBtn.textScaled = true;
+    restartBtn.text = "RESTART";
+    restartBtn.resize(250, 100);
+    restartBtn.color = "#FFFFFF";
+    restartBtn.onPress = function() {
+        window.location.reload()
+    }
+
+    startBtn = new Clickable();
+    startBtn.cornerRadius = 0;
+    startBtn.locate(520, 460);
+    startBtn.textScaled = true;
+    startBtn.text = "START";
+    startBtn.resize(250, 100);
+    startBtn.color = "#FFFFFF";
+    startBtn.onPress = function() {
+        start = false
+    }
+}
+
+function startMenuDraw(){
+    textSize(50);
+    textAlign(CENTER, CENTER);
+    fill(255, 204, 0);
+    text("MECHANT TOTOP", 640, 160);
+    startBtn.draw()
 }
 
 
@@ -483,70 +625,88 @@ function debug_up() {
         fill(255, 204, 0);
         text("fps : " + Math.floor(framert).toString(), 50, 10)
     }
+
 }
 
 function draw() {
     background(0);
-    // Shower()
-    if (!pause) {
-        if (timesec == 60) {
-            time += 1
-            timesec = 0
-        } else if (count % 60 == 0 && count != 0) {
-            timesec += 1
-        }
-    }
-    if (keyWentDown(ENTER) && gameOver == false) {
-        pause = !pause
-        if (pause) {
-            enemiesGrp.toArray().forEach(i => {
-                i.setSpeed(0, i.rotation)
-            })
-            bulletGrp.toArray().forEach(i => {
-                i.setSpeed(0, 0)
-            })
-            backgroundGrp.toArray().forEach(i => {
-                i.setSpeed(0, i.rotation)
-            })
-        } else {
-            backgroundGrp.toArray().forEach(i => {
-                i.setSpeed(i.currentSpeed, 90)
-            })
-            bulletGrp.toArray().forEach(i => {
-                i.setSpeed(i.currentSpeed, i.rot)
-            })
-
-        }
-    }
-    if (gameOver) {
-        cursor();
-        if (keyWentDown(ENTER)) {
-            gameOver = false
-            window.location.reload()
-        }
-        count++
-        game_over()
-        update_star()
+    if (start){
         if (count % 4 === 0) {
             draw_star()
         }
         drawSprites(backgroundGrp);
+        startMenuDraw()
     }
+    else{
+        if (!pause) {
+            if (!game_music.isPlaying()) {
+                game_music.play();
+            }
+        } else {
+            game_music.pause()
+        }
+        if (!pause) {
+            if (timesec == 60) {
+                time += 1
+                timesec = 0
+            } else if (count % 60 == 0 && count != 0) {
+                timesec += 1
+            }
+        }
+        if (keyWentDown(ENTER) && gameOver == false) {
+            pause = !pause
+            if (pause) {
+                enemiesGrp.toArray().forEach(i => {
+                    i.setSpeed(0, i.rotation)
+                })
+                bulletGrp.toArray().forEach(i => {
+                    i.setSpeed(0, 0)
+                })
+                backgroundGrp.toArray().forEach(i => {
+                    i.setSpeed(0, i.rotation)
+                })
+            } else {
+                backgroundGrp.toArray().forEach(i => {
+                    i.setSpeed(i.currentSpeed, 90)
+                })
+                bulletGrp.toArray().forEach(i => {
+                    i.setSpeed(i.currentSpeed, i.rot)
+                })
 
-    if (pause) {
-        drawSprites();
-        drawSprites(bulletGrp);
-        drawSprites(enemiesGrp);
-        drawSprites(playerGrp);
-    } else {
-        gameUpdate();
-        drawSprites();
-        drawSprites(bulletGrp);
-        drawSprites(enemiesGrp);
-        drawSprites(playerGrp);
-        draw_gui();
+            }
+        }
+        if (gameOver) {
+            cursor();
+            if (keyWentDown(ENTER)) {
+                game_music.stop()
+                gameOver = false
+                window.location.reload()
+            }
+            count++
+            game_over()
+            update_star()
+            if (count % 4 === 0) {
+                draw_star()
+            }
+            drawSprites(backgroundGrp);
+            restartBtn.draw();
+        }
+
+        if (pause) {
+            drawSprites();
+            drawSprites(bulletGrp);
+            drawSprites(enemiesGrp);
+            drawSprites(playerGrp);
+        } else {
+            gameUpdate();
+            drawSprites();
+            drawSprites(bulletGrp);
+            drawSprites(enemiesGrp);
+            drawSprites(playerGrp);
+            draw_gui();
+        }
+        debug_up();
     }
-    debug_up();
 }
 
 
@@ -581,7 +741,7 @@ let star_list = []
 
 function draw_star() {
     let star = createSprite(Math.floor(Math.random() * 1280), -5, 1, 1)
-    star.addImage(loadImage("./img/etoiles.png"))
+    star.addImage(etoileIMG)
     star.currentSpeed = Math.floor(Math.random() * 6) + 3
     star.setSpeed(star.currentSpeed, 90)
     star.rm = function() { if (star.position.y > 600) { this.remove() } }
