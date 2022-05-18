@@ -7,7 +7,7 @@ work with [p5.js](https://p5js.org) , [p5.play](http://molleindustria.github.io/
 
 ## How to play
 
-you can play the game [here]() or run locally
+you can play the game [here](https://tot0p.github.io/Space-ship-shooting/) or run locally
 
 
 
@@ -50,7 +50,23 @@ you can play the game [here]() or run locally
 
 ## Demo
 
-![img](demo_images/img.png)
+### main_menu
+![main_menu](demo_images/main_menu.PNG)
+
+### game_screen
+![game_screen](demo_images/gamescreen.PNG)
+
+### boss_battle
+![boss_battle](demo_images/boos_battle.PNG)
+
+### pause_menu
+![pause_menu](demo_images/pause_menu.PNG)
+
+### game_over
+![game_over](demo_images/game_over.PNG)
+
+### settings
+![settings](demo_images/settings.PNG)
 
 
 ## Music
