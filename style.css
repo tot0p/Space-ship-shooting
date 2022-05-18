@@ -16,3 +16,7 @@ html , body {
     font-family: Arial, Helvetica, sans-serif;
     border: 1px solid black;
 }  
+
+canvas {
+    border: 10px solid gray;
+}   
