@@ -3,8 +3,8 @@ let count_star = 0;
 
 let pause = false;
 let gameOver = false;
-let start = true
-let settings = false
+let start = true;
+let settings = false;
 
 let sprPlayer;
 let freeze;
