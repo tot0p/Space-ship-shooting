@@ -36,8 +36,47 @@ let canShoot = true;
 
 
 let tripleDoses = 0;
-
 let permitedShoot = 0;
+
+
+let framert;
+var phase1;
+var phase2;
+var phase3;
+var phase4;
+var phase5;
+var phase6;
+var tiny_ship;
+var tiny_ship_img;
+var player_shoot;
+var bullet_explosion;
+var player_death;
+var enemy_death;
+var hit_damage;
+var bounce_sound;
+var game_music;
+var menu_click;
+var restartBtn;
+var startBtn;
+var settingsBtn;
+var goBack;
+var validateSettings;
+var sprAsteroide;
+var doom_slayer;
+var temp_value;
+var effectsVolume;
+var effectSoundTest;
+var backToGame;
+let gui;
+let gamegui;
+let joystick;
+let s1;
+let s2;
+
+var hearts = [];
+
+let musicVolume;
+
 
 //#region Tools
 
@@ -78,7 +117,7 @@ function meteoriteOutOfScreen(body) {
 
 //#region Enemy
 
-//create enemy according to id
+//Create enemy according to id
 function createEnemy(x, y, w = 64, h = 64, hp = 100, id = 1) {
     let sprEnemy = createSprite(x, y, w, h);
     sprEnemy.collide(allSprites);
@@ -227,6 +266,8 @@ function createEnemy(x, y, w = 64, h = 64, hp = 100, id = 1) {
                     createpowerup(this.position.x, this.position.y, 64, 64, 0.5,tripleShoot,90,loadImage("img/iconetriple.png"));
                 } else if (random >= 13 && random <= 15){
                     createpowerup(this.position.x, this.position.y, 64, 64, 0.5,noShoot,90,loadImage("img/noshoot.png"));
+                } else if (random >= 16 && random <= 20 ){
+                    createpowerup(this.position.x, this.position.y, 64, 64, 0.5,Whey, 90,loadImage("img/Whey.png"));
                 }
             }
         }
@@ -446,12 +487,6 @@ function playerUpdate() {
         player_shoot.play();
     }
     outOfScreen(sprPlayer);
-    // powerup de ouf
-    // window.setTimeout(function(){bullet.setSpeed(15, sprPlayer.rotation-90)}, 1000)
-    // let bullet = createSprite(sprPlayer.position.x,sprPlayer.position.y,1,1)
-    // bullet.addImage(loadImage("./projectiles.png"))
-    // bullet.setSpeed(2, sprPlayer.rotation-90)
-    // window.setTimeout(function(){bullet.setSpeed(15, sprPlayer.rotation-90)}, 1000)
 }
 
 //Remove bullets on collision
@@ -480,7 +515,7 @@ function bulletUpdate() {
     });
 }
 
-//Create bullet's properti
+//Create bullet's properties
 //target = true == ennemies is target else player 
 function createBullet(x, y, image, rm, target = true, speed = 10, rot = sprPlayer.rotation - 90, time = 80, dmg = 20) {
     let bullet = createSprite(x, y, 1, 1);
@@ -505,7 +540,7 @@ function createBullet(x, y, image, rm, target = true, speed = 10, rot = sprPlaye
 
 //#region powerup
 
-
+//End Game and show text
 function Shower() {
     textSize(50);
     textAlign(CENTER, CENTER);
@@ -542,6 +577,7 @@ function coeurMaudit() {
     }
 }
 
+//Boost player speed
 function Whey() {
     if (sprPlayer.maxSpeed < 12) {
         sprPlayer.maxSpeed += 1;
@@ -552,26 +588,29 @@ function Whey() {
         } else if (sprPlayer.hp > 50) {
             sprPlayer.hp = 100;
         } else {
-            sprpowerup.hp = 50;
+            sprPlayer.hp += 50;
         }
     }
 }
 
+//The player now shoot 3 munitions
 function tripleShoot() {
     tripleDoses = 600;
 }
 
+//Prevent the player to shoot
 function noShoot(){
     permitedShoot = 300;
 }
 
-
+//Make you at 1 hp
 function Tacos() {
     sprPlayer.hp = 1;
     sprPlayer.lifes = 1;
     gameOvertxt = "Tacos, Tacos, Tacos";
 }
 
+//Create powerUp properties
 function createpowerup(x, y, h, w, speed, activation, direction, image) {
     let sprpowerup = createSprite(x, y);
     sprpowerup.setSpeed(speed, direction);
@@ -584,6 +623,7 @@ function createpowerup(x, y, h, w, speed, activation, direction, image) {
     sprpowerup.addToGroup(powerupGrp);
 }
 
+//Remove PowerUp when out of screen
 function updatePowerup() {
     powerupGrp.forEach(element => {
         element.collide(playerGrp, function() {
@@ -595,6 +635,7 @@ function updatePowerup() {
     });
 }
 
+//Generate random power up
 function generatePowerup() {
     if (count % 60 === 0) {
         let c = Math.floor(Math.random()* 10000) ;
@@ -617,6 +658,7 @@ function generatePowerup() {
 
 //#region gui
 
+//Create player's hearts
 function createHeart() {
     heartGrp = Group();
     for (let i = 0; i < 3; i++) {
@@ -626,6 +668,7 @@ function createHeart() {
     }
 }
 
+//Add heart's image
 function drawHeart(heart, id) {
     if (sprPlayer.lifes - 1 < id) {
         heart.addImage(hearts[5]);
@@ -637,6 +680,7 @@ function drawHeart(heart, id) {
     }
 }
 
+//Draw hearts on screen
 function drawLife() {
     let c = 0;
     for (let i of heartGrp) {
@@ -673,6 +717,7 @@ function drawWave() {
     text("Wave: " + wave.toString(), 1150, 25);
 }
 
+//Draw all GUI
 function draw_gui() {
     drawTime();
     drawScore();
@@ -682,20 +727,10 @@ function draw_gui() {
 
 //#endregion
 
-function gameUpdate() {
-    count++;
-    cheatCode();
-    playerUpdate();
-    start_back();
-    generateMeteorite();
-    updateEnemy();
-    bulletUpdate();
-    updatePowerup();
-    generatePowerup();
-}
 
 //#region cheatCode
 
+//defiened all cheatcode and active all
 function cheatCode() {
     if (keyWentDown(222)) {
         let command = prompt("command:");
@@ -762,7 +797,7 @@ function cheatCode() {
                 createpowerup(Math.floor(Math.random()* 1000 + 100), 0, 64, 64, 0.5, 
                     Whey
                 , 90,
-                loadImage("img/balleboss.png"));
+                loadImage("img/Whey.png"));
                 break;
             case "noshoot":
                 createpowerup(Math.floor(Math.random() * 1000 + 100 ),0, 64, 64, 2, noShoot,90,loadImage("img/noshoot.png"));
@@ -779,41 +814,21 @@ function cheatCode() {
 //#endregion
 
 
-let framert;
-var phase1;
-var phase2;
-var phase3;
-var phase4;
-var phase5;
-var phase6;
-var tiny_ship;
-var tiny_ship_img;
-var player_shoot;
-var bullet_explosion;
-var player_death;
-var enemy_death;
-var hit_damage;
-var bounce_sound;
-var game_music;
-var menu_click;
-var restartBtn;
-var startBtn;
-var settingsBtn;
-var goBack;
-var validateSettings;
-var sprAsteroide;
-var doom_slayer;
-var temp_value;
-var effectsVolume;
-var effectSoundTest;
-var backToGame;
-let gui;
-let gamegui;
-let joystick;
-let s1;
-let s2;
 
-var hearts = [];
+
+// Is function for update the game he was call in draw()
+function gameUpdate() {
+    count++;
+    cheatCode();
+    playerUpdate();
+    start_back();
+    generateMeteorite();
+    updateEnemy();
+    bulletUpdate();
+    updatePowerup();
+    generatePowerup();
+}
+
 
 //Load sounds & images before the game start
 function preload() {
@@ -848,6 +863,7 @@ function preload() {
     sprAsteroide = loadImage("./img/asteroide.png");
 }
 
+// setup is p5.js entry
 function setup() {
     window.onclose = game_music.stop();
     enemiesGrp = Group();
@@ -872,6 +888,8 @@ function setup() {
     s2 = createSlider("Slider", 300, 270, 700, 50, 0, 0.5);
 }
 
+
+//Create button for all menu
 function buttonSetup() {
     restartBtn = new Clickable();
     restartBtn.cornerRadius = 0;
@@ -998,6 +1016,8 @@ function debug_up() {
     }
 }
 
+
+//draw settingsMenuDraw
 function settingsMenuDraw() {
     s1.draw();
     s2.draw();
@@ -1023,8 +1043,9 @@ function settingsMenuDraw() {
     goBack.draw();
 }
 
-let musicVolume;
 
+
+// is Function for p5.js
 function draw() {
     background(0);        
     if (!game_music.isPlaying()) {
