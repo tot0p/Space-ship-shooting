@@ -7,7 +7,7 @@ html , body {
 
 #gameCanvasContainer{
     display: flex;
-    flex-direction: row;
+    flex-direction: column-reverse;
     align-items: center;
     justify-content: center;
     height: 100%;

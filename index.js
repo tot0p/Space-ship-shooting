@@ -745,6 +745,12 @@ function cheatCode() {
             case "pepito":
                 createMeteorite();
                 break;
+            case "meatball":
+                createMeteorite(loadImage("img/mars.png"));
+                break;
+            case "mae":
+                createMeteorite(loadImage("img/terre.png"));
+                break;
             case "life":
                 nb = prompt("nb ? ");
                 nb = parseInt(nb);
@@ -1214,10 +1220,10 @@ function start_back() {
 //#region Meteorite
 
 //Create meteorite's properties
-function createMeteorite() {
+function createMeteorite(img = sprAsteroide) {
     let beX = Math.floor(Math.random() * 1281);
     let sprMeteorite = createSprite(beX, -100, 94, 89);
-    sprMeteorite.addImage(sprAsteroide);
+    sprMeteorite.addImage(img);
     sprMeteorite.scale = Math.random() * 1 + 1;
     sprMeteorite.setSpeed(2, 90);
     sprMeteorite.rm = function() {

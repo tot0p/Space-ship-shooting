@@ -32,6 +32,8 @@ you can play the game [here](https://tot0p.github.io/Space-ship-shooting/) or ru
 | `lag`            | Create 10000 enemies   |
 | `mynameisoctopus`| Create 10 octopus      |
 | `pepito`         |  Spawn a meteorite     |
+| `meatball`       |  Spawn a special meteorite |
+| `mae`            |  Spawn a special meteorite |
 | `life`           | Heal your player       |
 | `wave`           | Carry to the wave x    |
 | `douche`         | Spawn a shower         |
