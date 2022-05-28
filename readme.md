@@ -24,6 +24,8 @@ you can play the game [here](https://tot0p.github.io/Space-ship-shooting/) or ru
   | `S` or `right_arrow` | turn right                  |
   | `A`                  | move left                   |
   | `E`                  | move right                  |
+  | `enter`              | set pause or unpause        |
+  
 
 ### Cheat codes
 
