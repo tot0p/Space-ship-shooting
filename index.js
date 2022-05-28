@@ -735,83 +735,85 @@ function cheatCode() {
     if (keyWentDown(222)) {
         let command = prompt("command:");
         let nb;
-        switch (command.toLocaleLowerCase()) {
-            case "lag":
-                createAllEnemy(10000, 1);
-                break;
-            case "mynameisoctopus":
-                createAllEnemy(10, 3);
-                break;
-            case "pepito":
-                createMeteorite();
-                break;
-            case "meatball":
-                createMeteorite(loadImage("img/mars.png"));
-                break;
-            case "mae":
-                createMeteorite(loadImage("img/terre.png"));
-                break;
-            case "life":
-                nb = prompt("nb ? ");
-                nb = parseInt(nb);
-                if (isNaN(nb)) {
-                    alert("is not number !!!");
+        if (command != null) {
+            switch (command.toLocaleLowerCase()) {
+                case "lag":
+                    createAllEnemy(10000, 1);
                     break;
-                }
-                sprPlayer.lifes = nb;
-                sprPlayer.hp = 100;
-                break;
-            case "wave":
-                nb = prompt("nb ? ");
-                nb = parseInt(nb);
-                if (isNaN(nb)) {
-                    alert("is not number !!!");
+                case "mynameisoctopus":
+                    createAllEnemy(10, 3);
                     break;
-                }
-                wave = nb - 1;
-                enemiesGrp.removeSprites();
-                break;
-            case "douche":
-                createpowerup(200, 0, 64, 64, 0.5, 
-                        Shower, 90,
-                    loadImage("img/Douche.png"));
-                break;
-            case "doomslayer":
-                game_music.stop();
-                game_music = doom_slayer ;
-                temp_value = s1.val;
-                game_music.setVolume(temp_value);
-                break;
-            case "tacos":
-                createpowerup(Math.floor(Math.random() * 1000 + 100 ), 0, 64, 64, 0.5,Tacos, 90, 
-                loadImage("img/Tacos.png"));
-                break;
-            case "shoot":
-                canShoot = !canShoot;
-                break;
-            case "tripledose":
-                createpowerup(Math.floor(Math.random() * 1000 + 100 ), 0, 64, 64, 2,tripleShoot,90,loadImage("img/iconetriple.png"));
-                break;
-            case "maudit":
-                createpowerup(Math.floor(Math.random() * 1000 + 100 ), 0, 64, 64, 2, coeurMaudit ,  90,
-                loadImage("img/Coeur6.png"));
-                break;
-            case "bigmama":
-                sprPlayer.scale +=1;
-                break;
-            case "whey":
-                createpowerup(Math.floor(Math.random()* 1000 + 100), 0, 64, 64, 0.5, 
-                    Whey
-                , 90,
-                loadImage("img/Whey.png"));
-                break;
-            case "noshoot":
-                createpowerup(Math.floor(Math.random() * 1000 + 100 ),0, 64, 64, 2, noShoot,90,loadImage("img/noshoot.png"));
-                break;
-            default:
-                alert("invalide command !!!");
-                createAllEnemy(1, 5);
-                break;
+                case "pepito":
+                    createMeteorite();
+                    break;
+                case "meatball":
+                    createMeteorite(loadImage("img/mars.png"));
+                    break;
+                case "mae":
+                    createMeteorite(loadImage("img/terre.png"));
+                    break;
+                case "life":
+                    nb = prompt("nb ? ");
+                    nb = parseInt(nb);
+                    if (isNaN(nb)) {
+                        alert("is not number !!!");
+                        break;
+                    }
+                    sprPlayer.lifes = nb;
+                    sprPlayer.hp = 100;
+                    break;
+                case "wave":
+                    nb = prompt("nb ? ");
+                    nb = parseInt(nb);
+                    if (isNaN(nb)) {
+                        alert("is not number !!!");
+                        break;
+                    }
+                    wave = nb - 1;
+                    enemiesGrp.removeSprites();
+                    break;
+                case "douche":
+                    createpowerup(200, 0, 64, 64, 0.5, 
+                            Shower, 90,
+                        loadImage("img/Douche.png"));
+                    break;
+                case "doomslayer":
+                    game_music.stop();
+                    game_music = doom_slayer ;
+                    temp_value = s1.val;
+                    game_music.setVolume(temp_value);
+                    break;
+                case "tacos":
+                    createpowerup(Math.floor(Math.random() * 1000 + 100 ), 0, 64, 64, 0.5,Tacos, 90, 
+                    loadImage("img/Tacos.png"));
+                    break;
+                case "shoot":
+                    canShoot = !canShoot;
+                    break;
+                case "tripledose":
+                    createpowerup(Math.floor(Math.random() * 1000 + 100 ), 0, 64, 64, 2,tripleShoot,90,loadImage("img/iconetriple.png"));
+                    break;
+                case "maudit":
+                    createpowerup(Math.floor(Math.random() * 1000 + 100 ), 0, 64, 64, 2, coeurMaudit ,  90,
+                    loadImage("img/Coeur6.png"));
+                    break;
+                case "bigmama":
+                    sprPlayer.scale +=1;
+                    break;
+                case "whey":
+                    createpowerup(Math.floor(Math.random()* 1000 + 100), 0, 64, 64, 0.5, 
+                        Whey
+                    , 90,
+                    loadImage("img/Whey.png"));
+                    break;
+                case "noshoot":
+                    createpowerup(Math.floor(Math.random() * 1000 + 100 ),0, 64, 64, 2, noShoot,90,loadImage("img/noshoot.png"));
+                    break;
+                default:
+                    alert("invalide command !!!");
+                    createAllEnemy(1, 5);
+                    break;
+            }
         }
     }
 }
