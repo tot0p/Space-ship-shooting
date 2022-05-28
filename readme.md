@@ -25,6 +25,8 @@ you can play the game [here](https://tot0p.github.io/Space-ship-shooting/) or ru
   | `A`                  | move left                   |
   | `E`                  | move right                  |
   | `enter`              | set pause or unpause        |
+  | `=`                  | draw fps counter            |
+
   
 
 ### Cheat codes
