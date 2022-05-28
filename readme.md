@@ -9,7 +9,8 @@ work with [p5.js](https://p5js.org) , [p5.play](http://molleindustria.github.io/
 
 you can play the game [here](https://tot0p.github.io/Space-ship-shooting/) or run locally
 
-⚠!!!!!!!!⚠ attention firefox is not the most optimized for the game ⚠!!!!!!!!⚠
+⚠⚠⚠ attention firefox is not the most optimized for the game ⚠⚠⚠
+
 navigator with motor chromium is better for this game
 
 
